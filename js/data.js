@@ -145,3 +145,30 @@ export const PRICE_RANGE = {
 export const ASSEMBLY_ZONES = ["France", "UE", "Hors UE"];
 
 export const BRANDS = [...new Set(CARS.map(c => c.brand))].sort((a, b) => a.localeCompare(b, "fr"));
+
+// Photos de fiche véhicule, indexées par `code`. Les fichiers vivent dans
+// `img/<code>/` et ne sont servis qu'en AVIF : à qualité perçue équivalente le
+// format pèse 2 à 5 fois moins qu'un JPEG. Sur une page dont le poids est
+// dominé par les images, c'est le levier d'éco-conception le plus direct.
+//
+// Un `code` absent (ou un tableau vide) fait retomber la fiche sur le gabarit
+// « pas encore de photos » : aucun lien d'image cassé.
+//
+// Pour ajouter des photos : déposez vos fichiers (jpg, jpeg, png ou webp),
+// lancez `tools/to-avif.sh <code> <fichiers…>`, puis collez ici l'entrée que
+// le script affiche — il renseigne déjà `file`, `w` et `h`. Restent à écrire
+// `label` (légende affichée sous la photo) et `alt` (description lue par les
+// lecteurs d'écran, obligatoire).
+//
+// `w` / `h` sont les dimensions réelles du fichier : posées sur le `<img>`,
+// elles réservent la place avant le chargement et évitent tout décalage de
+// mise en page.
+export const PHOTOS = {
+    // "tesla-model-y": [
+    //     { file: "profil.avif", w: 1600, h: 1000, label: "Vue de côté", alt: "Tesla Model Y vue de profil, côté conducteur." },
+    //     { file: "coffre.avif", w: 1600, h: 1000, label: "Coffre ouvert", alt: "Coffre arrière hayon ouvert, plancher et bac de rangement sous le plancher." },
+    //     { file: "tableau-de-bord.avif", w: 1600, h: 1000, label: "Tableau de bord", alt: "Planche de bord avec l'écran tactile central, le volant et la console." },
+    //     { file: "sieges-avant.avif", w: 1600, h: 1000, label: "Sièges avant", alt: "Les deux sièges avant et la console centrale." },
+    //     { file: "sieges-arriere.avif", w: 1600, h: 1000, label: "Sièges arrière", alt: "Banquette arrière trois places et accoudoir central." }
+    // ]
+};

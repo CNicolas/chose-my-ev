@@ -1,13 +1,37 @@
 import { h } from "../dom.js";
 import { sectionTitle } from "./shared.js";
 
-function photoSection() {
+// Carrousel sans JavaScript : une liste défilable horizontalement avec
+// `scroll-snap`. Le navigateur gère le défilement, le clavier et le tactile,
+// et les images hors écran ne sont téléchargées que si l'utilisateur fait
+// défiler jusqu'à elles (`loading="lazy"`).
+function photoSection(photos) {
+  if (!photos.length) {
+    return h("section", { "aria-label": "Photos", class: "photo-section" }, [
+      h("div", { class: "photo-placeholder" }, [
+        h("p", { class: "photo-placeholder__text" }, "pas encore de photos"),
+        h("p", { class: "photo-placeholder__hint" }, "Vues attendues : avant, profil, coffre, tableau de bord, sièges avant, sièges arrière")
+      ]),
+      h("div", { class: "photo-dots", "aria-hidden": "true" }, Array.from({ length: 6 }, () => h("span")))
+    ]);
+  }
+
   return h("section", { "aria-label": "Photos", class: "photo-section" }, [
-    h("div", { role: "group", "aria-roledescription": "carrousel", class: "photo-placeholder" }, [
-      h("p", { class: "photo-placeholder__text" }, "pas encore de photos"),
-      h("p", { class: "photo-placeholder__hint" }, "Vues attendues : avant, profil, coffre, tableau de bord, sièges avant, sièges arrière")
-    ]),
-    h("div", { class: "photo-dots", "aria-hidden": "true" }, Array.from({ length: 6 }, () => h("span")))
+    h("ul", {
+      class: "photo-carousel", tabindex: "0",
+      role: "group", "aria-roledescription": "carrousel",
+      "aria-label": `${photos.length} photos, faites défiler horizontalement`
+    }, photos.map((photo, i) => h("li", { class: "photo-slide" }, [
+      h("img", {
+        class: "photo-slide__img",
+        src: photo.src, alt: photo.alt,
+        width: photo.width, height: photo.height,
+        loading: i === 0 ? "eager" : "lazy",
+        decoding: "async"
+      }),
+      h("p", { class: "photo-slide__label", "aria-hidden": "true" }, photo.label)
+    ]))),
+    h("div", { class: "photo-dots", "aria-hidden": "true" }, photos.map(() => h("span")))
   ]);
 }
 
@@ -36,7 +60,7 @@ export function renderDetailScreen(car, actions) {
       h("p", { class: "detail__origin" }, car.origin)
     ]),
 
-    photoSection(),
+    photoSection(car.photos ?? []),
 
     h("div", { class: "score-row" }, [
       h("p", { class: "score-row__value" }, car.score),

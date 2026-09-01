@@ -1,7 +1,7 @@
 // Calcule, à partir de l'état applicatif, toutes les données prêtes à
 // afficher pour les trois écrans. Fonction pure : aucune référence au DOM, ce
 // qui la rend vérifiable indépendamment de l'affichage.
-import { CARS, BRANDS, ASSEMBLY_ZONES, PRICE_RANGE, PRICE_STEP } from "./data.js";
+import { CARS, PHOTOS, BRANDS, ASSEMBLY_ZONES, PRICE_RANGE, PRICE_STEP } from "./data.js";
 import { CRITERIA, frPrice, frNumber, rawValue } from "./format.js";
 import { filterCars, rankCars, criterionRank, computeBounds } from "./scoring.js";
 
@@ -68,6 +68,13 @@ export function buildViewModel(state) {
       rankLabel: `rang ${rankByCode.get(currentEntry.car.code)} sur ${total}`,
       selected: selectedCodes.includes(currentEntry.car.code),
       volume: `${frNumber(currentEntry.car.volume, 2)} m³`,
+      photos: (PHOTOS[currentEntry.car.code] ?? []).map(photo => ({
+        src: `img/${currentEntry.car.code}/${photo.file}`,
+        width: String(photo.w),
+        height: String(photo.h),
+        label: photo.label,
+        alt: `${currentEntry.car.name} — ${photo.alt}`
+      })),
       bars: currentEntry.parts.map(({ criterion }) => {
         const rank = criterionRank(ranked, criterion, currentEntry.car);
         const weight = state.weights[criterion.key] ?? 5;

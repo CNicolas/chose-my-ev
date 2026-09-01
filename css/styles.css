@@ -1,6 +1,7 @@
 /* Choose my EV — feuille de styles unique.
    Éco-conception : une seule famille de police (IBM Plex, deux graisses
-   utiles), pas d'images ni d'icônes, pas de framework CSS. */
+   utiles), pas d'icônes ni de framework CSS. Les seules images sont les photos
+   de fiche véhicule, servies en AVIF et chargées à la demande. */
 
 :root {
   --bg: #f6f5f2;
@@ -377,6 +378,49 @@ main { flex: 1; display: flex; flex-direction: column; }
 
 .photo-placeholder__text { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--muted); }
 .photo-placeholder__hint { margin: 0; font-size: 11.5px; color: var(--muted); }
+
+/* Carrousel : défilement natif avec accroche, sans JavaScript ni librairie. */
+.photo-carousel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.photo-carousel::-webkit-scrollbar { display: none; }
+
+.photo-slide {
+  position: relative;
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--sunk);
+}
+
+.photo-slide__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.photo-slide__label {
+  position: absolute;
+  inset: auto 0 0 0;
+  margin: 0;
+  padding: 16px 10px 7px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, .62), rgba(0, 0, 0, 0));
+}
 
 .photo-dots { display: flex; gap: 6px; justify-content: center; padding: 10px 0 0; }
 .photo-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); }

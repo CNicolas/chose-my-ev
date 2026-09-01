@@ -16,7 +16,8 @@ build**, HTML/CSS/JS natif.
   (France / UE / hors UE). Le score est toujours recalculé sur les seuls
   modèles visibles.
 - **Fiche véhicule** — détail critère par critère avec le rang du modèle sur
-  chaque critère, et emplacement prévu pour les photos.
+  chaque critère, et carrousel de photos (voir *Photos* plus bas). Tant qu'un
+  modèle n'a pas de photos, la fiche affiche le gabarit prévu à cet effet.
 - **Comparaison** — tableau de 2 à 3 véhicules côte à côte, la meilleure
   valeur de chaque ligne est marquée d'une ★.
 - **Réglages persistants et partageables** — sauvegardés dans le
@@ -25,7 +26,8 @@ build**, HTML/CSS/JS natif.
 - **Thème clair / sombre** suivant la préférence du système.
 - Pensée pour l'accessibilité (navigation clavier, focus géré à chaque
   changement d'écran, libellés lecteur d'écran) et l'éco-conception (une
-  seule police, pas d'images ni d'icônes, pas de dépendance).
+  seule police, pas d'icônes, pas de dépendance, photos en AVIF chargées à
+  la demande).
 
 ## Lancer en local
 
@@ -44,9 +46,11 @@ l'affaire (`npx serve`, l'aperçu intégré de WebStorm, etc.).
 ```
 index.html            Structure de la page, en-tête, conteneur des écrans
 css/styles.css         Feuille de styles unique (variables CSS, thème clair/sombre)
+img/<code>/           Photos d'un véhicule, en AVIF (voir « Photos »)
+tools/to-avif.sh       Conversion des photos sources vers AVIF
 js/
   app.js               État applicatif, actions, routage entre écrans, rendu
-  data.js              Jeu de données véhicules + zones d'assemblage / marques
+  data.js              Jeu de données véhicules + photos + zones / marques
   scoring.js           Filtrage, normalisation, score pondéré (logique pure)
   viewmodel.js         Transforme l'état en données prêtes à afficher (pure)
   format.js            Formatage FR, définition des 11 critères
@@ -84,6 +88,44 @@ Le jeu de données (14 modèles) est codé en dur dans
 renseignés manuellement à la conception et **restent à vérifier avant tout
 usage réel**. Le `chargeRate` (km récupérés par minute) est dérivé de
 l'autonomie et du temps de recharge.
+
+## Photos
+
+Les photos de fiche véhicule sont servies **uniquement en AVIF**. À qualité
+perçue équivalente, le format pèse 2 à 5 fois moins qu'un JPEG : sur une page
+dont le poids est dominé par les images, c'est le levier d'éco-conception le
+plus direct. Le carrousel n'utilise aucun JavaScript (défilement natif avec
+`scroll-snap`) et les vues hors écran ne sont téléchargées que si l'on fait
+défiler jusqu'à elles (`loading="lazy"`).
+
+Le dépôt ne contient aucune photo : il faut fournir les vôtres, en veillant à
+en détenir les droits. Les vues attendues sont l'avant, le profil, le coffre,
+le tableau de bord, les sièges avant et les sièges arrière.
+
+### Ajouter les photos d'un modèle
+
+`tools/to-avif.sh` fait la conversion en local — pas besoin d'un convertisseur
+en ligne. Il accepte des sources **jpg, jpeg, png et webp**, ramène la largeur
+à 1600 px maximum (sans jamais agrandir) et conserve le rapport d'origine.
+Il ne dépend que de `ffmpeg` (`brew install ffmpeg`), avec un encodeur AV1.
+
+```bash
+tools/to-avif.sh tesla-model-y ~/Photos/model-y/*.jpg
+```
+
+Les fichiers sont écrits dans `img/tesla-model-y/`, et le script affiche
+l'entrée à coller dans `PHOTOS`, au bas de [`js/data.js`](js/data.js) — avec
+`file`, `w` et `h` déjà renseignés. Il reste à écrire pour chaque vue son
+`label` (légende affichée) et son `alt` (description lue par les lecteurs
+d'écran). Un modèle absent de `PHOTOS` garde le gabarit « pas encore de
+photos ».
+
+La qualité se règle avec `CRF` (défaut `32`, plus bas = meilleur et plus
+lourd) et la vitesse d'encodage avec `PRESET` :
+
+```bash
+CRF=26 tools/to-avif.sh tesla-model-y ~/Photos/model-y/*.png
+```
 
 ## Crédits
 

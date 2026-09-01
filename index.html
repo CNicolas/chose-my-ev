@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Comparez et triez des voitures électriques selon vos propres critères pondérés : prix, autonomie, recharge, coffre, encombrement et plus.">
+<title>Choose my EV — Comparateur de voitures électriques</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a href="#contenu" class="skip-link">Aller au contenu</a>
+
+<div class="app-shell">
+  <div class="app-frame">
+
+    <header class="app-header">
+      <h1 class="app-title">
+        <button type="button" id="home-btn" class="app-title-btn">Choose my EV</button>
+      </h1>
+      <button type="button" id="compare-tab-btn" class="btn btn--tab">Comparer</button>
+    </header>
+
+    <main id="contenu"></main>
+
+    <div id="fab" class="fab-wrapper" hidden>
+      <button type="button" id="fab-btn" class="btn--fab"></button>
+    </div>
+
+  </div>
+</div>
+
+<noscript>
+  <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:#f6f5f2;color:#1b1a18;font-family:sans-serif">
+    Choose my EV nécessite JavaScript pour calculer et afficher le classement des véhicules.
+  </div>
+</noscript>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

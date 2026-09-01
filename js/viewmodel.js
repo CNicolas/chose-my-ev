@@ -51,10 +51,9 @@ export function buildViewModel(state) {
 
     rows: displayOrder.map(({ car, score }) => ({
       code: car.code,
-      rank: String(rankByCode.get(car.code)).padStart(2, "0"),
       name: car.name,
       score: String(score),
-      figures: `${frPrice(car.price)} · ${car.range} km · ${frNumber(car.surface, 2)} m² · ⚡ ${frNumber(car.chargeRate, 1)} km/min`,
+      figures: `${frPrice(car.price)} · ${car.range} km · ${frNumber(car.surface, 2)} m² · ⚡︎ ${frNumber(car.chargeRate, 1)} km/min`,
       selected: selectedCodes.includes(car.code)
     })),
 

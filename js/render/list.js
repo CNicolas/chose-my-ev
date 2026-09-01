@@ -99,7 +99,6 @@ function vehicleRow(row, actions) {
     "aria-label": `Voir la fiche de ${row.name}, score ${row.score} sur 100`,
     onclick: () => actions.onOpenCar(row.code)
   }, [
-    h("span", { "aria-hidden": "true", class: "vehicle-list__rank" }, row.rank),
     h("span", { class: "vehicle-list__name" }, row.name),
     h("span", { class: "vehicle-list__score" }, row.score),
     h("span", { class: "vehicle-list__figures" }, row.figures)

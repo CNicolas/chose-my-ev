@@ -1,4 +1,4 @@
-import { CARS, BRANDS, ASSEMBLY_ZONES } from "./data.js";
+import { CARS, BRANDS, ASSEMBLY_ZONES, PRICE_RANGE } from "./data.js";
 import { CRITERIA } from "./format.js";
 import { defaultWeights } from "./scoring.js";
 import { buildViewModel } from "./viewmodel.js";
@@ -19,7 +19,9 @@ function sanitizeConfig(raw) {
       if (Number.isInteger(v) && v >= 0 && v <= 10) weights[c.key] = v;
     }
   }
-  const budget = Number.isFinite(raw?.budget) ? Math.min(70000, Math.max(45000, raw.budget)) : 70000;
+  const budget = Number.isFinite(raw?.budget)
+    ? Math.min(PRICE_RANGE.max, Math.max(PRICE_RANGE.min, raw.budget))
+    : PRICE_RANGE.max;
   const offBrands = new Set(Array.isArray(raw?.offBrands) ? raw.offBrands.filter(b => BRANDS.includes(b)) : []);
   const offZones = new Set(Array.isArray(raw?.offZones) ? raw.offZones.filter(z => ASSEMBLY_ZONES.includes(z)) : []);
   const selected = Array.isArray(raw?.selected) ? raw.selected.filter(c => KNOWN_CAR_CODES.has(c)).slice(-3) : [];
@@ -71,7 +73,7 @@ const actions = {
   onToggleBrand: brand => apply({ offBrands: toggledSet(state.offBrands, brand) }, { persist: true }),
   onToggleZone: zone => apply({ offZones: toggledSet(state.offZones, zone) }, { persist: true }),
   onReset: () => apply({
-    weights: defaultWeights(CRITERIA), budget: 70000, offBrands: new Set(), offZones: new Set(), selected: []
+    weights: defaultWeights(CRITERIA), budget: PRICE_RANGE.max, offBrands: new Set(), offZones: new Set(), selected: []
   }, { persist: true }),
   // Recréer le <details> à chaque rendu avec `open` déjà positionné déclenche
   // un évènement "toggle" synthétique (même détaché du DOM) : sans ce garde,

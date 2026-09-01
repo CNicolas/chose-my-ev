@@ -1,7 +1,7 @@
 // Calcule, à partir de l'état applicatif, toutes les données prêtes à
 // afficher pour les trois écrans. Fonction pure : aucune référence au DOM, ce
 // qui la rend vérifiable indépendamment de l'affichage.
-import { CARS, BRANDS, ASSEMBLY_ZONES } from "./data.js";
+import { CARS, BRANDS, ASSEMBLY_ZONES, PRICE_RANGE, PRICE_STEP } from "./data.js";
 import { CRITERIA, frPrice, frNumber, rawValue } from "./format.js";
 import { filterCars, rankCars, criterionRank, computeBounds } from "./scoring.js";
 
@@ -39,6 +39,9 @@ export function buildViewModel(state) {
     criteria: CRITERIA.map(c => ({ key: c.key, label: c.label, value: state.weights[c.key] ?? 5 })),
     budget: state.budget,
     budgetLabel: frPrice(state.budget),
+    budgetMin: PRICE_RANGE.min,
+    budgetMax: PRICE_RANGE.max,
+    budgetStep: PRICE_STEP,
     brandFilters: BRANDS.map(b => ({ value: b, label: b, on: !state.offBrands.has(b) })),
     zoneFilters: ASSEMBLY_ZONES.map(z => ({ value: z, label: z, on: !state.offZones.has(z) })),
 

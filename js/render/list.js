@@ -26,7 +26,9 @@ function weightSlider(criterion, actions) {
 function budgetSlider(vm, actions) {
   const output = h("output", { for: "budget", class: "slider-row__value" }, vm.budgetLabel);
   const range = h("input", {
-    type: "range", id: "budget", min: "45000", max: "70000", step: "500", value: String(vm.budget),
+    type: "range", id: "budget",
+    min: String(vm.budgetMin), max: String(vm.budgetMax), step: String(vm.budgetStep),
+    value: String(vm.budget),
     oninput: e => { output.textContent = frPrice(Number(e.target.value)); },
     onchange: e => actions.onBudgetChange(Number(e.target.value))
   });

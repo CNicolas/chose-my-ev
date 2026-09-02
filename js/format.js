@@ -45,3 +45,38 @@ export function rawValue(criterion, value) {
     default: return frNumber(value, criterion.key === "power" ? 1 : undefined);
   }
 }
+
+// Vues de photo reconnues, dans l'ordre d'affichage du carrousel. Le nom du
+// fichier source donne la vue : `profil.jpg` -> `profil`. C'est la seule
+// convention à respecter en déposant les photos ; tout le reste (conversion
+// AVIF, dimensions, manifeste) est produit par `tools/to-avif.sh`.
+//
+// `alt` est la description lue par les lecteurs d'écran ; elle est préfixée du
+// nom du modèle au moment du rendu. Une vue hors de cette liste reste affichée,
+// légendée à partir de son nom de fichier.
+export const PHOTO_VIEWS = [
+  { view: "avant", label: "Vue de face", alt: "vu de face, calandre et optiques avant." },
+  { view: "profil", label: "Vue de côté", alt: "vu de profil, côté conducteur." },
+  { view: "arriere", label: "Vue arrière", alt: "vu de l'arrière, hayon fermé et feux." },
+  { view: "coffre", label: "Coffre ouvert", alt: "coffre arrière ouvert, plancher de chargement." },
+  { view: "tableau-de-bord", label: "Tableau de bord", alt: "planche de bord, écran central et volant." },
+  { view: "sieges-avant", label: "Sièges avant", alt: "sièges avant et console centrale." },
+  { view: "sieges-arriere", label: "Sièges arrière", alt: "banquette arrière et accoudoir central." }
+];
+
+// Retrouve la vue correspondant à un nom de fichier AVIF. Une vue inconnue est
+// légendée à partir de son nom ("prise-de-charge" -> "Prise de charge") et
+// classée après les vues connues, plutôt que d'être ignorée.
+export function photoView(file) {
+  const view = file.replace(/\.avif$/, "");
+  const known = PHOTO_VIEWS.findIndex(v => v.view === view);
+  if (known !== -1) return { order: known, ...PHOTO_VIEWS[known] };
+
+  const label = view.replace(/-/g, " ");
+  return {
+    order: PHOTO_VIEWS.length,
+    view,
+    label: label.charAt(0).toUpperCase() + label.slice(1),
+    alt: `vue « ${label} ».`
+  };
+}

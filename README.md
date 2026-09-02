@@ -46,14 +46,16 @@ l'affaire (`npx serve`, l'aperçu intégré de WebStorm, etc.).
 ```
 index.html            Structure de la page, en-tête, conteneur des écrans
 css/styles.css         Feuille de styles unique (variables CSS, thème clair/sombre)
-img/<code>/           Photos d'un véhicule, en AVIF (voir « Photos »)
-tools/to-avif.sh       Conversion des photos sources vers AVIF
+photos/<code>/        Photos sources (hors dépôt), converties par le script
+img/<code>/           Photos publiées, en AVIF (voir « Photos »)
+tools/to-avif.sh       Conversion vers AVIF + génération de js/photos.js
 js/
   app.js               État applicatif, actions, routage entre écrans, rendu
-  data.js              Jeu de données véhicules + photos + zones / marques
+  data.js              Jeu de données véhicules + zones d'assemblage / marques
+  photos.js            Manifeste des photos — GÉNÉRÉ, ne pas éditer
   scoring.js           Filtrage, normalisation, score pondéré (logique pure)
   viewmodel.js         Transforme l'état en données prêtes à afficher (pure)
-  format.js            Formatage FR, définition des 11 critères
+  format.js            Formatage FR, les 11 critères, les vues de photo
   persistence.js       Sauvegarde localStorage + hash d'URL (base64)
   dom.js               Micro-utilitaire de création de DOM + gestion du focus
   render/
@@ -98,34 +100,88 @@ plus direct. Le carrousel n'utilise aucun JavaScript (défilement natif avec
 `scroll-snap`) et les vues hors écran ne sont téléchargées que si l'on fait
 défiler jusqu'à elles (`loading="lazy"`).
 
-Le dépôt ne contient aucune photo : il faut fournir les vôtres, en veillant à
-en détenir les droits. Les vues attendues sont l'avant, le profil, le coffre,
-le tableau de bord, les sièges avant et les sièges arrière.
+Le dépôt contient les photos de 14 modèles (6 vues chacun), reprises du projet
+[react-electric-vehicles](https://github.com/CNicolas/react-electric-vehicles).
+Les autres modèles gardent le gabarit « pas encore de photos ». Veillez à
+détenir les droits des photos que vous ajoutez.
 
-### Ajouter les photos d'un modèle
+### Ajouter des photos
 
-`tools/to-avif.sh` fait la conversion en local — pas besoin d'un convertisseur
-en ligne. Il accepte des sources **jpg, jpeg, png et webp**, ramène la largeur
-à 1600 px maximum (sans jamais agrandir) et conserve le rapport d'origine.
-Il ne dépend que de `ffmpeg` (`brew install ffmpeg`), avec un encodeur AV1.
+Une seule convention à respecter : **un dossier par véhicule, nommé d'après son
+`code` dans [`js/data.js`](js/data.js), et un fichier par vue**.
 
-```bash
-tools/to-avif.sh tesla-model-y ~/Photos/model-y/*.jpg
+```
+photos/
+  tesla-model-y/
+    avant.jpg
+    profil.jpg
+    coffre.jpg
+    tableau-de-bord.jpg
+    sieges-avant.jpg
+    sieges-arriere.jpg
+  kia-ev3/
+    profil.png
+    coffre.webp
 ```
 
-Les fichiers sont écrits dans `img/tesla-model-y/`, et le script affiche
-l'entrée à coller dans `PHOTOS`, au bas de [`js/data.js`](js/data.js) — avec
-`file`, `w` et `h` déjà renseignés. Il reste à écrire pour chaque vue son
-`label` (légende affichée) et son `alt` (description lue par les lecteurs
-d'écran). Un modèle absent de `PHOTOS` garde le gabarit « pas encore de
-photos ».
-
-La qualité se règle avec `CRF` (défaut `32`, plus bas = meilleur et plus
-lourd) et la vitesse d'encodage avec `PRESET` :
+Puis, une fois pour toutes les voitures :
 
 ```bash
-CRF=26 tools/to-avif.sh tesla-model-y ~/Photos/model-y/*.png
+tools/to-avif.sh
 ```
+
+Le script convertit tout ce qui est nouveau ou modifié vers `img/<code>/`, puis
+**régénère [`js/photos.js`](js/photos.js)** à partir du contenu réel de `img/`.
+Il n'y a donc jamais de code à modifier à la main : déposer les photos, lancer
+le script, committer `img/` et `js/photos.js`. Au déploiement suivant, les
+photos apparaissent sur les fiches concernées.
+
+Un modèle sans photo garde le gabarit « pas encore de photos », et un `code`
+qui ne correspond à aucun véhicule est simplement ignoré à l'affichage.
+
+**Vues reconnues**, dans l'ordre du carrousel : `avant`, `profil`, `arriere`,
+`coffre`, `tableau-de-bord`, `sieges-avant`, `sieges-arriere`. C'est le nom du
+fichier qui désigne la vue, et il en tire sa légende ainsi que la description
+lue par les lecteurs d'écran — les deux vivent dans `PHOTO_VIEWS`
+([`js/format.js`](js/format.js)), le seul endroit à toucher pour reformuler un
+libellé. Une vue hors liste (`prise-de-charge.jpg`) reste publiée, légendée à
+partir de son nom et placée en fin de carrousel.
+
+Le nom du fichier est normalisé : `Sièges Avant.JPG` et `sieges_avant.jpeg`
+donnent tous deux `sieges-avant.avif`.
+
+### Détails utiles
+
+- **Formats sources acceptés** : `jpg`, `jpeg`, `png`, `webp`, `avif`. Le reste
+  est ignoré avec un message, ce qui permet de laisser traîner un `.txt` ou un
+  `.HEIC` dans le dossier sans casser la conversion.
+- **Sources déjà en AVIF** : copiées telles quelles si elles ne dépassent pas
+  1600 px de large. Les réencoder leur ferait subir une seconde compression
+  avec pertes pour un gain de poids nul. Si le réencodage d'une source AVIF
+  trop large ressort malgré tout plus lourd que l'originale, c'est l'originale
+  qui est conservée.
+- **Redimensionnement** : largeur ramenée à 1600 px maximum, jamais agrandie,
+  rapport d'origine conservé.
+- **Noms de vue anglais** traduits au passage : `front`, `side`, `back`,
+  `trunk`, `dashboard`, `frontseats`, `backseats`. Un fichier
+  `dashboard.avif` devient donc `tableau-de-bord.avif`.
+- **Relances** : une photo déjà convertie et inchangée est sautée
+  (`à jour`). `FORCE=1` réencode tout.
+- **Un seul modèle** : `tools/to-avif.sh tesla-model-y kia-ev3`.
+- **Retirer une photo** : supprimez le `.avif` dans `img/<code>/` et relancez
+  le script — le manifeste est reconstruit depuis `img/`, pas depuis `photos/`.
+  Le script tourne même sans dossier `photos/` : il se contente alors de
+  régénérer le manifeste à partir de `img/`.
+- **Qualité et vitesse** : `CRF` (défaut `32`, plus bas = meilleur et plus
+  lourd) et `PRESET` (défaut `6`, plus haut = plus rapide).
+
+```bash
+CRF=26 PRESET=8 tools/to-avif.sh
+```
+
+- **Dépendance** : `ffmpeg` avec un encodeur AV1 (`brew install ffmpeg`).
+- `photos/` est dans `.gitignore` : seuls les AVIF sont poussés. Retirez la
+  ligne si vous préférez versionner aussi les originaux.
 
 ## Crédits
 

@@ -1,4 +1,5 @@
 import { h } from "../dom.js";
+import { PHOTO_VIEWS } from "../format.js";
 import { sectionTitle } from "./shared.js";
 
 // Carrousel sans JavaScript : une liste défilable horizontalement avec
@@ -10,9 +11,12 @@ function photoSection(photos) {
     return h("section", { "aria-label": "Photos", class: "photo-section" }, [
       h("div", { class: "photo-placeholder" }, [
         h("p", { class: "photo-placeholder__text" }, "pas encore de photos"),
-        h("p", { class: "photo-placeholder__hint" }, "Vues attendues : avant, profil, coffre, tableau de bord, sièges avant, sièges arrière")
+        // Liste dérivée de PHOTO_VIEWS pour ne pas dériver de la convention
+        // réellement appliquée par tools/to-avif.sh.
+        h("p", { class: "photo-placeholder__hint" },
+          `Vues attendues : ${PHOTO_VIEWS.map(v => v.label.toLowerCase()).join(", ")}`)
       ]),
-      h("div", { class: "photo-dots", "aria-hidden": "true" }, Array.from({ length: 6 }, () => h("span")))
+      h("div", { class: "photo-dots", "aria-hidden": "true" }, PHOTO_VIEWS.map(() => h("span")))
     ]);
   }
 

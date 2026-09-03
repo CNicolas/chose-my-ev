@@ -1,123 +1,126 @@
 // FICHIER GÉNÉRÉ — ne pas modifier à la main.
 //
-// Produit par `tools/to-avif.sh`, qui parcourt `img/<code>/` et relève les
-// dimensions réelles de chaque AVIF. Pour ajouter des photos : déposez-les
-// dans `photos/<code>/<vue>.jpg`, lancez le script, committez. Aucun autre
-// fichier n'est à toucher.
+// Produit par `tools/to-avif.sh`, qui parcourt `img/<code>/` et regroupe les
+// variantes de chaque vue. Pour ajouter des photos : déposez-les dans
+// `photos/<code>/<vue>.jpg`, lancez le script, committez. Aucun autre fichier
+// n'est à toucher.
 //
-// Les dimensions sont posées sur le `<img>` : elles réservent la place avant
-// le chargement et évitent tout décalage de mise en page.
+// `w` liste les largeurs publiées d'une même vue, de la plus petite à la plus
+// grande : elles alimentent le `srcset` du carrousel, qui laisse le navigateur
+// télécharger la seule variante adaptée à son écran. Toutes sont recadrées au
+// format PHOTO_ASPECT (16/10), qui fournit la hauteur et réserve la place
+// avant le chargement — donc aucun décalage de mise en page.
 export const PHOTOS = {
     "audi-q4-sportback": [
-        { file: "arriere.avif", w: 1800, h: 1200 },
-        { file: "avant.avif", w: 1280, h: 764 },
-        { file: "coffre.avif", w: 640, h: 426 },
-        { file: "profil.avif", w: 1600, h: 900 },
-        { file: "sieges-arriere.avif", w: 1600, h: 900 },
-        { file: "tableau-de-bord.avif", w: 1280, h: 853 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1222] },
+        { view: "coffre", w: [448, 640] },
+        { view: "profil", w: [448, 896, 1344] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1280] }
     ],
     "audi-q4": [
-        { file: "arriere.avif", w: 1600, h: 1066 },
-        { file: "avant.avif", w: 1600, h: 1067 },
-        { file: "coffre.avif", w: 1200, h: 800 },
-        { file: "profil.avif", w: 1500, h: 844 },
-        { file: "sieges-arriere.avif", w: 1200, h: 900 },
-        { file: "tableau-de-bord.avif", w: 1600, h: 1066 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1200] },
+        { view: "profil", w: [448, 896, 1344] },
+        { view: "sieges-arriere", w: [448, 896, 1200] },
+        { view: "tableau-de-bord", w: [448, 896, 1344] }
     ],
     "bmw-ix1": [
-        { file: "arriere.avif", w: 1440, h: 897 },
-        { file: "avant.avif", w: 1280, h: 720 },
-        { file: "coffre.avif", w: 1600, h: 1066 },
-        { file: "profil.avif", w: 1200, h: 800 },
-        { file: "sieges-arriere.avif", w: 705, h: 529 },
-        { file: "tableau-de-bord.avif", w: 1600, h: 1066 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1152] },
+        { view: "coffre", w: [448, 896, 1344] },
+        { view: "profil", w: [448, 896, 1200] },
+        { view: "sieges-arriere", w: [448, 704] },
+        { view: "tableau-de-bord", w: [448, 896, 1344] }
     ],
     "ds-7-e-tense": [
-        { file: "arriere.avif", w: 1600, h: 900 },
-        { file: "avant.avif", w: 1600, h: 1200 },
-        { file: "coffre.avif", w: 938, h: 704 },
-        { file: "profil.avif", w: 690, h: 518 },
-        { file: "sieges-arriere.avif", w: 1280, h: 960 },
-        { file: "tableau-de-bord.avif", w: 1024, h: 490 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 938] },
+        { view: "profil", w: [448, 690] },
+        { view: "sieges-arriere", w: [448, 896, 1280] },
+        { view: "tableau-de-bord", w: [448, 784] }
     ],
     "ford-mustang-mach-e-premium": [
-        { file: "arriere.avif", w: 1024, h: 768 },
-        { file: "avant.avif", w: 900, h: 600 },
-        { file: "coffre.avif", w: 750, h: 500 },
-        { file: "profil.avif", w: 1024, h: 566 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1066 },
-        { file: "tableau-de-bord.avif", w: 1600, h: 1066 }
+        { view: "arriere", w: [448, 896, 1024] },
+        { view: "avant", w: [448, 896, 900] },
+        { view: "coffre", w: [448, 750] },
+        { view: "profil", w: [448, 896, 904] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1344] }
     ],
     "hyundai-ioniq-5": [
-        { file: "arriere.avif", w: 1600, h: 1066 },
-        { file: "avant.avif", w: 1600, h: 1066 },
-        { file: "coffre.avif", w: 1600, h: 1068 },
-        { file: "profil.avif", w: 1139, h: 643 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1067 },
-        { file: "tableau-de-bord.avif", w: 1600, h: 1067 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1344] },
+        { view: "profil", w: [448, 896, 1028] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1344] }
     ],
     "kia-ev6": [
-        { file: "arriere.avif", w: 1600, h: 1066 },
-        { file: "avant.avif", w: 1600, h: 1066 },
-        { file: "coffre.avif", w: 1600, h: 900 },
-        { file: "profil.avif", w: 1280, h: 960 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1066 },
-        { file: "tableau-de-bord.avif", w: 1600, h: 900 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1344] },
+        { view: "profil", w: [448, 896, 1280] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1344] }
     ],
     "mercedes-eqb-250": [
-        { file: "arriere.avif", w: 640, h: 480 },
-        { file: "avant.avif", w: 640, h: 482 },
-        { file: "coffre.avif", w: 1600, h: 1066 },
-        { file: "profil.avif", w: 800, h: 400 },
-        { file: "sieges-arriere.avif", w: 675, h: 450 },
-        { file: "tableau-de-bord.avif", w: 836, h: 530 }
+        { view: "arriere", w: [448, 640] },
+        { view: "avant", w: [448, 640] },
+        { view: "coffre", w: [448, 896, 1344] },
+        { view: "profil", w: [448, 640] },
+        { view: "sieges-arriere", w: [448, 674] },
+        { view: "tableau-de-bord", w: [448, 836] }
     ],
     "skoda-enyaq": [
-        { file: "arriere.avif", w: 1010, h: 650 },
-        { file: "avant.avif", w: 1600, h: 1200 },
-        { file: "coffre.avif", w: 1538, h: 1024 },
-        { file: "profil.avif", w: 1600, h: 1200 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1200 },
-        { file: "tableau-de-bord.avif", w: 705, h: 529 }
+        { view: "arriere", w: [448, 896, 1010] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1344] },
+        { view: "profil", w: [448, 896, 1344] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 704] }
     ],
     "tesla-model-3": [
-        { file: "arriere.avif", w: 1600, h: 1200 },
-        { file: "avant.avif", w: 1200, h: 900 },
-        { file: "coffre.avif", w: 930, h: 620 },
-        { file: "profil.avif", w: 1024, h: 768 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1200 },
-        { file: "tableau-de-bord.avif", w: 1341, h: 894 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1200] },
+        { view: "coffre", w: [448, 896, 930] },
+        { view: "profil", w: [448, 896, 1024] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1340] }
     ],
     "tesla-model-y": [
-        { file: "arriere.avif", w: 1600, h: 1200 },
-        { file: "avant.avif", w: 1600, h: 1200 },
-        { file: "coffre.avif", w: 1024, h: 768 },
-        { file: "profil.avif", w: 1067, h: 800 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1066 },
-        { file: "tableau-de-bord.avif", w: 1181, h: 787 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1024] },
+        { view: "profil", w: [448, 896, 1066] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1180] }
     ],
     "volkswagen-id4": [
-        { file: "arriere.avif", w: 1600, h: 1066 },
-        { file: "avant.avif", w: 720, h: 478 },
-        { file: "coffre.avif", w: 1024, h: 683 },
-        { file: "profil.avif", w: 1600, h: 1200 },
-        { file: "sieges-arriere.avif", w: 1275, h: 956 },
-        { file: "tableau-de-bord.avif", w: 1024, h: 690 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 720] },
+        { view: "coffre", w: [448, 896, 1024] },
+        { view: "profil", w: [448, 896, 1344] },
+        { view: "sieges-arriere", w: [448, 896, 1274] },
+        { view: "tableau-de-bord", w: [448, 896, 1024] }
     ],
     "volkswagen-id5": [
-        { file: "arriere.avif", w: 1600, h: 900 },
-        { file: "avant.avif", w: 1600, h: 1304 },
-        { file: "coffre.avif", w: 1280, h: 720 },
-        { file: "profil.avif", w: 1776, h: 996 },
-        { file: "sieges-arriere.avif", w: 1200, h: 800 },
-        { file: "tableau-de-bord.avif", w: 1600, h: 1066 }
+        { view: "arriere", w: [448, 896, 1344] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1152] },
+        { view: "profil", w: [448, 896, 1344] },
+        { view: "sieges-arriere", w: [448, 896, 1200] },
+        { view: "tableau-de-bord", w: [448, 896, 1344] }
     ],
     "volvo-xc40-recharge": [
-        { file: "arriere.avif", w: 800, h: 600 },
-        { file: "avant.avif", w: 1600, h: 1067 },
-        { file: "coffre.avif", w: 1600, h: 1066 },
-        { file: "profil.avif", w: 1600, h: 900 },
-        { file: "sieges-arriere.avif", w: 1600, h: 1068 },
-        { file: "tableau-de-bord.avif", w: 1024, h: 684 }
+        { view: "arriere", w: [448, 800] },
+        { view: "avant", w: [448, 896, 1344] },
+        { view: "coffre", w: [448, 896, 1344] },
+        { view: "profil", w: [448, 896, 1344] },
+        { view: "sieges-arriere", w: [448, 896, 1344] },
+        { view: "tableau-de-bord", w: [448, 896, 1024] }
     ]
 };

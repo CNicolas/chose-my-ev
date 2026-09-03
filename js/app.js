@@ -3,7 +3,8 @@ import { CRITERIA } from "./format.js";
 import { defaultWeights } from "./scoring.js";
 import { buildViewModel } from "./viewmodel.js";
 import { replaceContentPreservingFocus } from "./dom.js";
-import { loadConfig, saveConfig } from "./persistence.js";
+import { loadConfig, saveConfig, syncHash } from "./persistence.js";
+import { parseRoute, pathFor, formatHash, currentPath, currentCfg } from "./router.js";
 import { renderListScreen } from "./render/list.js";
 import { renderDetailScreen } from "./render/detail.js";
 import { renderCompareScreen } from "./render/compare.js";
@@ -29,12 +30,23 @@ function sanitizeConfig(raw) {
   return { weights, budget, offBrands, offZones, selected, sortKey };
 }
 
+// Traduit une route en état d'écran. Un code de modèle inconnu — lien périmé,
+// modèle retiré du jeu de données — retombe sur le classement plutôt que
+// d'afficher la fiche d'un autre véhicule.
+function routeToState(route) {
+  if (route.screen === "detail" && KNOWN_CAR_CODES.has(route.code)) {
+    return { screen: "detail", current: route.code };
+  }
+  return { screen: route.screen === "compare" ? "compare" : "list", current: null };
+}
+
+const bootRoute = parseRoute();
+
 const state = {
-  screen: "list",
-  current: null,
+  ...routeToState(bootRoute),
   accordionOpen: false,
   scrolled: false,
-  ...sanitizeConfig(loadConfig())
+  ...sanitizeConfig(loadConfig(currentCfg()))
 };
 
 function persistableConfig() {
@@ -81,18 +93,54 @@ const actions = {
   // en boucle infinie.
   onAccordionToggle: open => { if (open !== state.accordionOpen) apply({ accordionOpen: open }); },
   onSortChange: key => apply({ sortKey: key }, { persist: true }),
-  onOpenCar: code => apply({ screen: "detail", current: code }, { navigation: true }),
+  onOpenCar: code => navigate("detail", code),
   onToggleCompare: code => apply({ selected: toggleSelected(state.selected, code) }, { persist: true }),
   onClearSelection: () => apply({ selected: [] }, { persist: true }),
-  onGoList: () => apply({ screen: "list" }, { navigation: true }),
-  onGoCompare: () => apply({ screen: "compare" }, { navigation: true })
+  onGoList: () => navigate("list"),
+  onGoCompare: () => navigate("compare")
 };
+
+// Changer d'écran, c'est écrire la route dans le hash et laisser l'évènement
+// `hashchange` redessiner. Un seul chemin de code sert donc les boutons de
+// l'application et les flèches Précédent / Suivant du navigateur — et un F5
+// sur une fiche rouvre cette fiche, puisque tout l'état d'écran est dans l'URL.
+function navigate(screen, code = null) {
+  const hash = formatHash(pathFor(screen, code), currentCfg());
+  if (location.hash === hash) return;
+  location.hash = hash;
+}
+
+function applyRoute(route, { navigation = true } = {}) {
+  apply(routeToState(route), { navigation });
+
+  // Réaligne l'URL sur l'écran réellement affiché, sans empiler d'historique :
+  // un code inconnu doit disparaître de la barre d'adresse, et un ancien lien
+  // `#cfg=...` prendre la forme `#/?cfg=...`.
+  const path = pathFor(state.screen, state.current);
+  if (currentPath() !== path) history.replaceState(null, "", formatHash(path, currentCfg()));
+
+  // Les réglages ne sont lus dans l'URL qu'au démarrage : ils vivent ensuite
+  // dans l'état et le localStorage, le hash n'en est qu'un reflet. On le
+  // réécrit ici pour qu'un retour arrière ne laisse pas une configuration
+  // périmée dans une URL qu'on partagerait ensuite. Une première visite, elle,
+  // garde une URL nue tant que rien n'a été réglé.
+  if (location.hash) syncHash(persistableConfig());
+}
+
+window.addEventListener("hashchange", () => applyRoute(parseRoute()));
 
 const main = document.getElementById("contenu");
 const homeBtn = document.getElementById("home-btn");
 const compareTabBtn = document.getElementById("compare-tab-btn");
 const fabWrapper = document.getElementById("fab");
 const fabBtn = document.getElementById("fab-btn");
+
+// Le lien d'évitement pointe sur `#contenu` : le laisser écrire dans le hash
+// écraserait la route. On déplace le focus nous-mêmes.
+document.querySelector(".skip-link").addEventListener("click", event => {
+  event.preventDefault();
+  main.focus();
+});
 
 homeBtn.addEventListener("click", actions.onGoList);
 compareTabBtn.addEventListener("click", actions.onGoCompare);
@@ -161,4 +209,4 @@ window.addEventListener("scroll", () => {
   });
 }, { passive: true });
 
-render();
+applyRoute(bootRoute, { navigation: false });

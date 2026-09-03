@@ -3,7 +3,7 @@
 // qui la rend vérifiable indépendamment de l'affichage.
 import { CARS, BRANDS, ASSEMBLY_ZONES, PRICE_RANGE, PRICE_STEP } from "./data.js";
 import { PHOTOS } from "./photos.js";
-import { CRITERIA, photoView, frPrice, frNumber, rawValue } from "./format.js";
+import { CRITERIA, PHOTO_ASPECT, PHOTO_SIZES, photoView, frPrice, frNumber, rawValue } from "./format.js";
 import { filterCars, rankCars, criterionRank, computeBounds } from "./scoring.js";
 
 export function buildViewModel(state) {
@@ -96,20 +96,41 @@ export function buildViewModel(state) {
 }
 
 
-// Le manifeste `img.js` est généré en parcourant un dossier : il arrive donc
-// dans l'ordre alphabétique des fichiers. L'ordre d'affichage voulu (extérieur
-// puis intérieur) vit dans PHOTO_VIEWS, côté code, et est appliqué ici.
+// Le manifeste est généré en parcourant un dossier : il arrive donc dans
+// l'ordre alphabétique des vues. L'ordre d'affichage voulu (extérieur puis
+// intérieur) vit dans PHOTO_VIEWS, côté code, et est appliqué ici.
+//
+// Chaque vue existe en plusieurs largeurs (448 / 896 / 1344 px selon ce que la
+// source permet). On les décrit toutes dans un `srcset` et on laisse le
+// navigateur n'en télécharger qu'une : celle qui correspond à la taille réelle
+// de la diapositive sur son écran, densité de pixels comprise. Servir la plus
+// grande à tout le monde ferait télécharger jusqu'à treize fois trop de pixels.
+//
+// `src` porte la plus petite variante : c'est le repli des navigateurs sans
+// `srcset`, et à ce titre il vaut mieux qu'il soit léger — tous ceux qui
+// savent lire l'AVIF savent lire un `srcset`, il ne sera en pratique jamais
+// téléchargé.
 function buildPhotos(car) {
   return (PHOTOS[car.code] ?? [])
-    .map(photo => ({ photo, view: photoView(photo.file) }))
-    .sort((a, b) => a.view.order - b.view.order || a.photo.file.localeCompare(b.photo.file, "fr"))
-    .map(({ photo, view }) => ({
-      src: `img/${car.code}/${photo.file}`,
-      width: String(photo.w),
-      height: String(photo.h),
-      label: view.label,
-      alt: `${car.name} — ${view.alt}`
-    }));
+    .map(photo => ({ photo, view: photoView(photo.view) }))
+    .sort((a, b) => a.view.order - b.view.order || a.photo.view.localeCompare(b.photo.view, "fr"))
+    .map(({ photo, view }) => {
+      const widths = [...photo.w].sort((a, b) => a - b);
+      const largest = widths[widths.length - 1];
+      const url = w => `img/${car.code}/${photo.view}-${w}.avif`;
+      return {
+        src: url(widths[0]),
+        srcset: widths.map(w => `${url(w)} ${w}w`).join(", "),
+        sizes: PHOTO_SIZES,
+        // Dimensions de la plus grande variante : seul leur rapport compte,
+        // le CSS impose la largeur. Elles réservent la place avant le
+        // chargement et évitent tout décalage de mise en page.
+        width: String(largest),
+        height: String(Math.round(largest * PHOTO_ASPECT.h / PHOTO_ASPECT.w)),
+        label: view.label,
+        alt: `${car.name} — ${view.alt}`
+      };
+    });
 }
 
 function buildCompareViewModel(selectedEntries) {

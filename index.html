@@ -24,7 +24,7 @@
       <button type="button" id="compare-tab-btn" class="btn btn--tab">Comparer</button>
     </header>
 
-    <main id="contenu"></main>
+    <main id="contenu" tabindex="-1"></main>
 
     <div id="fab" class="fab-wrapper" hidden>
       <button type="button" id="fab-btn" class="btn--fab"></button>
@@ -40,5 +40,17 @@
 </noscript>
 
 <script type="module" src="js/app.js"></script>
+
+<!--
+  Cache hors-ligne (voir sw.js). Enregistré après le chargement pour ne pas
+  disputer la bande passante au premier rendu, et seulement en http(s) : un
+  service worker ne s'installe pas depuis file://, et l'échec polluerait la
+  console pour rien.
+-->
+<script>
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  }
+</script>
 </body>
 </html>

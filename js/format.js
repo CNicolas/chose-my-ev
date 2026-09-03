@@ -46,6 +46,20 @@ export function rawValue(criterion, value) {
   }
 }
 
+// Format d'affichage du carrousel. `tools/to-avif.sh` recadre toutes les
+// variantes à ce ratio et le CSS l'applique via `aspect-ratio` : la hauteur
+// d'une photo se déduit donc de sa largeur, sans avoir à la stocker dans le
+// manifeste, et la place est réservée avant le chargement — aucun décalage de
+// mise en page.
+export const PHOTO_ASPECT = { w: 16, h: 10 };
+
+// Largeur réelle d'une diapositive, décrite au navigateur pour qu'il choisisse
+// la variante du `srcset` dès l'analyse du HTML, avant même d'avoir appliqué le
+// CSS. Le cadre `.app-frame` est capé à 460 px et `.photo-section` retire 16 px
+// de marge de chaque côté : 428 px au maximum, 100vw - 32px en dessous.
+// À garder synchronisé avec css/styles.css et WIDTHS dans tools/to-avif.sh.
+export const PHOTO_SIZES = "(max-width: 460px) calc(100vw - 32px), 428px";
+
 // Vues de photo reconnues, dans l'ordre d'affichage du carrousel. Le nom du
 // fichier source donne la vue : `profil.jpg` -> `profil`. C'est la seule
 // convention à respecter en déposant les photos ; tout le reste (conversion
@@ -64,11 +78,10 @@ export const PHOTO_VIEWS = [
   { view: "sieges-arriere", label: "Sièges arrière", alt: "banquette arrière et accoudoir central." }
 ];
 
-// Retrouve la vue correspondant à un nom de fichier AVIF. Une vue inconnue est
-// légendée à partir de son nom ("prise-de-charge" -> "Prise de charge") et
+// Retrouve la vue correspondant à un identifiant du manifeste. Une vue inconnue
+// est légendée à partir de son nom ("prise-de-charge" -> "Prise de charge") et
 // classée après les vues connues, plutôt que d'être ignorée.
-export function photoView(file) {
-  const view = file.replace(/\.avif$/, "");
+export function photoView(view) {
   const known = PHOTO_VIEWS.findIndex(v => v.view === view);
   if (known !== -1) return { order: known, ...PHOTO_VIEWS[known] };
 

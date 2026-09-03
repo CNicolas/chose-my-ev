@@ -5,7 +5,9 @@ import { sectionTitle } from "./shared.js";
 // Carrousel sans JavaScript : une liste défilable horizontalement avec
 // `scroll-snap`. Le navigateur gère le défilement, le clavier et le tactile,
 // et les images hors écran ne sont téléchargées que si l'utilisateur fait
-// défiler jusqu'à elles (`loading="lazy"`).
+// défiler jusqu'à elles (`loading="lazy"`). L'écran fiche n'étant construit
+// qu'à l'ouverture d'un modèle, rien de tout cela n'est chargé au démarrage :
+// une visite qui reste sur le classement ne télécharge aucune photo.
 function photoSection(photos) {
   if (!photos.length) {
     return h("section", { "aria-label": "Photos", class: "photo-section" }, [
@@ -26,11 +28,19 @@ function photoSection(photos) {
       role: "group", "aria-roledescription": "carrousel",
       "aria-label": `${photos.length} photos, faites défiler horizontalement`
     }, photos.map((photo, i) => h("li", { class: "photo-slide" }, [
+      // `srcset` et `sizes` sont posés avant `src` : le navigateur démarre le
+      // téléchargement dès l'affectation de `src`, et les lire après le laisserait
+      // partir sur la mauvaise variante.
+      //
+      // La première diapositive est la seule visible d'emblée : elle est chargée
+      // en priorité haute, les suivantes attendent le défilement.
       h("img", {
         class: "photo-slide__img",
+        srcset: photo.srcset, sizes: photo.sizes,
         src: photo.src, alt: photo.alt,
         width: photo.width, height: photo.height,
         loading: i === 0 ? "eager" : "lazy",
+        fetchpriority: i === 0 ? "high" : "low",
         decoding: "async"
       }),
       h("p", { class: "photo-slide__label", "aria-hidden": "true" }, photo.label)

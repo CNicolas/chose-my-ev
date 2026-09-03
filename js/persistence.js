@@ -1,5 +1,7 @@
 // Sauvegarde des réglages (pondérations, budget, filtres, sélection, tri) en
 // local et dans le hash d'URL, pour un lien partageable.
+import { currentPath, formatHash } from "./router.js";
+
 const STORAGE_KEY = "ev-cfg";
 
 function toBase64(json) {
@@ -15,16 +17,26 @@ function fromBase64(base64) {
   return new TextDecoder().decode(bytes);
 }
 
-export function saveConfig(config) {
-  const json = JSON.stringify(config);
-  try { localStorage.setItem(STORAGE_KEY, json); } catch { /* stockage indisponible (mode privé, quota) */ }
-  try { history.replaceState(null, "", `#cfg=${toBase64(json)}`); } catch { /* hash non modifiable */ }
+// Réécrit les réglages dans le hash sans toucher au chemin — donc sans changer
+// d'écran — et sans empiler d'entrée d'historique : régler un curseur n'est pas
+// une navigation, le bouton « Précédent » ne doit pas avoir à les défaire une
+// par une.
+export function syncHash(config) {
+  try {
+    history.replaceState(null, "", formatHash(currentPath(), toBase64(JSON.stringify(config))));
+  } catch { /* hash non modifiable */ }
 }
 
-export function loadConfig() {
-  const match = location.hash.match(/cfg=([^&]+)/);
-  if (match) {
-    try { return JSON.parse(fromBase64(decodeURIComponent(match[1]))); } catch { /* lien corrompu, on ignore */ }
+export function saveConfig(config) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); } catch { /* stockage indisponible (mode privé, quota) */ }
+  syncHash(config);
+}
+
+// `cfg` vient de l'URL : un lien partagé l'emporte sur les réglages locaux du
+// visiteur, sinon il n'ouvrirait pas la configuration qu'on lui a envoyée.
+export function loadConfig(cfg) {
+  if (cfg) {
+    try { return JSON.parse(fromBase64(decodeURIComponent(cfg))); } catch { /* lien corrompu, on ignore */ }
   }
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
